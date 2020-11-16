@@ -84,10 +84,10 @@ def get_hottopic(text,connection,date,country):
         ner_generallist_prop = pd.Series(ner_generallist).value_counts()/len(headlines_samples[key])
         compare_ner[key+'_prop'] = ner_generallist_prop
     compare_ner['random_day_prop'] = compare_ner.random_day_prop.fillna(0.001)
-    compare_ner['comparison_metric'] = (compare_ner.target_day_prop)**2 / compare_ner.random_day_prop #comparison metric
-    weights = compare_ner.target_day_engagement / compare_ner.random_day_engagement
-    weights = np.where(weights < 1,1,weights)
-    weights[weights == np.inf] = 1
+    compare_ner['comparison_metric'] = compare_ner.target_day_prop / compare_ner.random_day_prop #comparison metric
+    random_day_engagement_fillna =  compare_ner.random_day_engagement.fillna(1)
+    random_day_engagement_fillna = np.where(random_day_engagement_fillna < 1,1,random_day_engagement_fillna)
+    weights = compare_ner.target_day_engagement / random_day_engagement_fillna
     compare_ner['comparison_metric_weighted'] =  compare_ner.comparison_metric * np.sqrt(weights) #comparison metric wieghted for engagement
     compare_ner = compare_ner.sort_values('comparison_metric_weighted',ascending=False)
     checklen = [len(x) > 1 for x in compare_ner.index]
@@ -130,7 +130,7 @@ def morality(text):
     return morality_scores
 def toxic(text):
     toxicity_score = dict()
-    api_key = open("perspective_api_key.txt.txt", "r").read()
+    api_key = open("perspective_api_key.txt", "r").read()
     url = ('https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze' +
            '?key=' + api_key)
     time.sleep(1)
@@ -156,7 +156,7 @@ demotexts = pd.read_csv('demotexts.csv',sep=";",quotechar="'",encoding="utf-8")
 con = connect_todb('connection_db.csv')
 
 for index,row in demotexts.iterrows():
-    print("\nText #"+str(index)+":\n############\n")
+    print("\nText #"+str(index+1)+":\n############\n")
     print("Text to analyze: " + row['text'] + '\nDate: ' + row['date'])
     print('\nHot topic metrics:\n-----------------')
     print(get_hottopic(text=row['text'],connection=con,date=row['date'],country=row['country']))
