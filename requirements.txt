@@ -1,0 +1,9 @@
+pip install psycopg2==2.8.6
+pip install pandas
+pip install googletrans==3.0.0
+pip install vaderSentiment==3.3.2
+pip install moralizer==0.1.4
+pip install spacy==2.3.2
+pip install tweet-preprocessor==0.6.0
+python -m spacy download en_core_web_sm
+python -m spacy download nl_core_news_sm
